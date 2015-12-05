@@ -1,0 +1,23 @@
+FROM ubuntu:14.04
+
+ENV VIEW_DB_OWNER=mongodb \
+    VIEW_DB_DATA_DIR=/var/lib/viewdb \
+    VIEW_DB_LOG_DIR=/var/log/viewdb
+
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 \
+ && echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' > /etc/apt/sources.list.d/mongodb.list \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y mongodb-org-server \
+ && sed 's/^bind_ip/#bind_ip/' -i /etc/mongod.conf \
+ && rm -rf /var/lib/apt/lists/*
+
+ADD viewdb/entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
+
+ADD ./populate_env.sh /populate_env.sh
+RUN chmod 755 /populate_env.sh
+
+EXPOSE 27017/tcp
+VOLUME ["${VIEW_DB_DATA_DIR}"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/bin/mongod"]

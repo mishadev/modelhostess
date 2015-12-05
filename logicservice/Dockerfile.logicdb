@@ -1,0 +1,23 @@
+FROM ubuntu:14.04
+
+ENV LOGIC_DB_OWNER=mongodb \
+    LOGIC_DB_DATA_DIR=/var/lib/logicdb \
+    LOGIC_DB_LOG_DIR=/var/log/logicdb
+
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10 \
+ && echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' > /etc/apt/sources.list.d/mongodb.list \
+ && apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y mongodb-org-server \
+ && sed 's/^bind_ip/#bind_ip/' -i /etc/mongod.conf \
+ && rm -rf /var/lib/apt/lists/*
+
+ADD logicdb/entrypoint.sh /entrypoint.sh
+RUN chmod 755 /entrypoint.sh
+
+ADD ./populate_env.sh /populate_env.sh
+RUN chmod 755 /populate_env.sh
+
+EXPOSE 27017/tcp
+VOLUME ["${LOGIC_DB_DATA_DIR}"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/bin/mongod"]

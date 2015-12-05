@@ -1,0 +1,13 @@
+{
+  "name": "osteroid-view-serializer",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node /src/logic/bin/main"
+  },
+  "dependencies": {
+    "mongodb": "~2.0.49",
+    "lodash": "~3.10.1",
+    "amqplib": "~0.4.0"
+  }
+}
