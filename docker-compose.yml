@@ -1,0 +1,71 @@
+viewserver:
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./viewservice/viewserver:/src/viewserver
+    - ./infrastructure:/src/infrastructure
+  dockerfile: ./Dockerfile.viewserver
+  ports:
+    - "0.0.0.0:3001:3000"
+  build: ./viewservice
+  links:
+    - viewdb
+    - mqserver
+viewserializer:
+  build: ./viewservice
+  dockerfile: ./Dockerfile.viewserializer
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./viewservice/viewserializer:/src/viewserializer
+    - ./infrastructure:/src/infrastructure
+  links:
+    - viewdb
+    - mqserver
+viewdb:
+  build: ./viewservice
+  dockerfile: ./Dockerfile.viewdb
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./viewlogs:/var/logs
+
+mqserver:
+  build: ./interactionservice
+  dockerfile: ./Dockerfile.mqserver
+  volumes:
+    - ./secrets:/etc/secrets
+
+logic:
+  build: ./logicservice
+  dockerfile: ./Dockerfile.logic
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./logicservice/logic:/src/logic
+    - ./infrastructure:/src/infrastructure
+  links:
+    - logicdb
+    - mqserver
+logicdb:
+  build: ./logicservice
+  dockerfile: ./Dockerfile.logicdb
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./logiclogs:/var/logs
+
+webapiserver:
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./webapiservice/webapiserver:/src/webapiserver
+    - ./infrastructure:/src/infrastructure
+  dockerfile: ./Dockerfile.webapiserver
+  ports:
+    - "0.0.0.0:3000:3000"
+  build: ./webapiservice
+
+assetsserver:
+  volumes:
+    - ./secrets:/etc/secrets
+    - ./assetsservice/assetsserver:/src/assetsserver
+    - ./infrastructure:/src/infrastructure
+  dockerfile: ./Dockerfile.assetsserver
+  ports:
+    - "0.0.0.0:3003:3000"
+  build: ./assetsservice

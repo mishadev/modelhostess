@@ -1,5 +1,6 @@
 "use strict";
 
+var path = require('path');
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var eslint = require('gulp-eslint');
@@ -26,58 +27,44 @@ require('harmonize')();
 // Boo.
 var isWatching = false;
 
-// set these with environmental variables, e.g. env MINIFY=1 gulp build-js
-var envOpts = {
-	minify: process.env.MINIFY || false
-};
+var StyleSheetsOutput = process.env.STYLESHEETS_OUTPUT;
+var JavaScriptOutput = process.env.JAVASCRIPT_OUTPUT;
 
 // holds path descriptors for our input files
 var paths = {
-	scripts: ["js/**/*.js"],
-	tests: ["js/**/__tests__/*.js"],
-	sass: ["scss/app.scss"],
-	sassAllFiles: ["scss/**/*.scss"],
-	mdifonts: ["node_modules/mdi/fonts/**"]
+	scripts: ["src/**/*.js"],
+	tests: ["src/**/__tests__/*.js"],
+	sass: ["src/scss/app.scss"],
+	sassAllFiles: ["src/scss/**/*.scss"]
 };
 
 var externalLibs = [
-	'jquery',
 	'lodash',
 	'react',
-	'react/addons',
-	'react-masonry-mixin',
 	'crossroads',
-	'hasher',
-	'react-tap-event-plugin',
-	'react-dropzone',
-	'react-tagsinput',
-	'react-timer-mixin',
-	'velocity-animate',
-	'velocity-animate/velocity.ui',
-	'object-assign',
-	'handlebars',
-	'browserify',
 	'flux',
 	'events'
 ];
 
 // run browserify, with or without setting up incremental rebuilds with watchify
-function doBrowserify (withWatchify) {
+function doBrowserify (configuration) {
+	var isDevelopment = (configuration === 'dev');
+
 	var browserifyOpts = {
 		transform: ["reactify", "envify"],
-		entries: ["./js/app.js"]
+		entries: ["bin/app.js"]
 	};
 	// "watchify(browserified)" has the same API as "browserified", but watches for changes
 	// and calls event handler registered with .on("update")
 	var browserified = browserify(browserifyOpts);
-	browserified = withWatchify ? watchify(browserified) : browserified;
+	browserified = isDevelopment ? watchify(browserified) : browserified;
 
 	externalLibs.forEach(function(lib) {
 		browserified.external(lib);
 	});
 
 	var f = function (changedFiles) {
-		if (withWatchify) {
+		if (isDevelopment) {
 			isWatching = true;
 		}
 
@@ -86,7 +73,7 @@ function doBrowserify (withWatchify) {
 			compileStream = browserified.bundle()
 				.on('error', function (error) {
 					gutil.log(error);
-					if (!withWatchify) {
+					if (!isDevelopment) {
 						process.exit(1);
 					}
 				})
@@ -96,7 +83,7 @@ function doBrowserify (withWatchify) {
 				.pipe(source('app.min.js'))
 				.pipe(buffer())
 				.pipe(streamify(uglify()))
-				.pipe(gulp.dest('./js-bundle'));
+				.pipe(gulp.dest(JavaScriptOutput));
 		} else {
 			compileStream = browserified.bundle()
 				.on('error', function (error) {
@@ -110,7 +97,7 @@ function doBrowserify (withWatchify) {
 				})
 				.pipe(source('app.js'))
 				.pipe(buffer())
-				.pipe(gulp.dest('./js-bundle'));
+				.pipe(gulp.dest(JavaScriptOutput));
 		}
 
 		if (changedFiles && Array.isArray(changedFiles)) {
@@ -132,9 +119,8 @@ function doBrowserify (withWatchify) {
 	return f;
 }
 
-gulp.task('build-js', ['clean-js', 'lint', 'build-vendor-js', 'build-iframe-js'], doBrowserify(false));
-gulp.task('watch-js', ['clean-js', 'lint', 'build-vendor-js', 'watch-iframe-js'], doBrowserify(true));
-
+gulp.task('build-prod', ['clean-js', 'lint', 'build-vendor-js'], doBrowserify('prod'));
+gulp.task('build-dev', ['clean-js', 'lint', 'build-vendor-js'], doBrowserify('dev'));
 
 gulp.task('lint', function () {
 	return gulp.src(paths.scripts)
@@ -143,11 +129,11 @@ gulp.task('lint', function () {
 		.pipe(eslint.failOnError());
 });
 
-gulp.task('build-css', ['clean-css', 'build-mdi-fonts', 'build-iframe-css'], function () {
+gulp.task('build-css', ['clean-css'], function () {
 	return gulp.src(paths.sass)
 		.pipe(concat('app.css'))
 		.pipe(sass().on('error', sass.logError))
-		.pipe(gulp.dest('./css-bundle/'));
+		.pipe(gulp.dest(StyleSheetsOutput));
 });
 
 gulp.task('test', function () {
@@ -176,7 +162,7 @@ gulp.task('watch-test', function () {
 });
 
 gulp.task('clean-css', function () {
-	return gulp.src("./css-bundle/**/*.css").pipe(through.obj(function (file, enc, cb) {
+	return gulp.src(path.join(StyleSheetsOutput, "**/*.css")).pipe(through.obj(function (file, enc, cb) {
 		del(file.path, function (err, deletedFiles) {
 			if (!err) {
 				gutil.log("Deleted", deletedFiles);
@@ -187,7 +173,7 @@ gulp.task('clean-css', function () {
 });
 
 gulp.task('clean-js', function () {
-	return gulp.src("./js-bundle/**/*.js").pipe(through.obj(function (file, enc, cb) {
+	return gulp.src(path.join(StyleSheetsOutput, "**/*.js")).pipe(through.obj(function (file, enc, cb) {
 		del(file.path, function (err, deletedFiles) {
 			if (!err) {
 				gutil.log("Deleted", deletedFiles);
@@ -196,24 +182,6 @@ gulp.task('clean-js', function () {
 		});
 	}));
 });
-
-gulp.task('clean-mdi-fonts', function () {
-	return gulp.src("../font/materialdesignicons-webfont*").pipe(through.obj(function (file, enc, cb) {
-		del(file.path, {force: true}, function (err, deletedFiles) {
-			if (!err) {
-				gutil.log("Deleted", deletedFiles);
-				cb();
-			}
-		});
-	}));
-});
-
-gulp.task('build-mdi-fonts', ['clean-mdi-fonts'], function () {
-	return gulp.src(paths.mdifonts)
-		.pipe(gulp.dest('../font/'));
-});
-
-gulp.task('default', ['watch-build']);
 
 gulp.task('build-vendor-js', function() {
 	var browserified = browserify();
@@ -228,55 +196,14 @@ gulp.task('build-vendor-js', function() {
 			.pipe(source('vendor.min.js'))
 			.pipe(buffer())
 			.pipe(streamify(uglify()))
-			.pipe(gulp.dest('./js-bundle'));
+			.pipe(gulp.dest(JavaScriptOutput));
 	} else {
 		browserified.bundle()
 			.on('error', gutil.log.bind(gutil, "Browserify Error"))
 			.pipe(source('vendor.js'))
 			.pipe(buffer())
-			.pipe(gulp.dest('./js-bundle'));
+			.pipe(gulp.dest(JavaScriptOutput));
 	}
-});
-
-function iframeBundle(withWatchify) {
-	var browserifyOpts = {
-		entries: ["./js/rendering/iframe"]
-	};
-	var browserified = withWatchify ? watchify(browserify(browserifyOpts)) : browserify(browserifyOpts);
-
-	var build = function() {
-		if (envOpts.minify) {
-			browserified.bundle()
-				.on('error', gutil.log.bind(gutil, "Browserify Error"))
-				.pipe(source('iframe.min.js'))
-				.pipe(buffer())
-				.pipe(streamify(uglify()))
-				.pipe(gulp.dest('./js-bundle'));
-		} else {
-			browserified.bundle()
-				.on('error', gutil.log.bind(gutil, "Browserify Error"))
-				.pipe(source('iframe.js'))
-				.pipe(buffer())
-				.pipe(gulp.dest('./js-bundle'));
-		}
-	};
-
-	if (withWatchify) {
-		browserified.on('update', build);
-		browserified.on('log', gutil.log);
-	}
-
-	return build;
-}
-
-gulp.task('build-iframe-js', ['clean-js', 'lint', 'build-vendor-js'], iframeBundle());
-gulp.task('watch-iframe-js', ['clean-js', 'lint', 'build-vendor-js'], iframeBundle(true));
-
-gulp.task('build-iframe-css', ['clean-css'], function () {
-	return gulp.src('scss/iframe.scss')
-		.pipe(concat('iframe.css'))
-		.pipe(sass().on('error', sass.logError))
-		.pipe(gulp.dest('./css-bundle/'));
 });
 
 gulp.on('stop', function () {
@@ -286,3 +213,5 @@ gulp.on('stop', function () {
 		});
 	}
 });
+
+gulp.task('default', ['build-dev']);

@@ -1,6 +1,9 @@
 {
   "name": "osteroid-view-serializer",
+  "author": "Michael Nakonechny",
   "version": "0.0.1",
+  "description": "ModelHostess",
+  "repository": "https://github.com/PhoboSys/modelhostess",
   "private": true,
   "scripts": {
     "start": "node /src/viewserializer/bin/main"

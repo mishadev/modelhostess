@@ -1,0 +1,19 @@
+{
+    "env": {
+        "browser": true,
+        "node": true
+    },
+    "settings": {
+        "ecmascript": 6,
+        "jsx": true
+    },
+    "rules": {
+        "strict": 0,
+        "quotes": [2, "single"],
+        "camelcase": 1,
+        "no-underscore-dangle": 0,
+        "no-console": 1,
+        "no-undef": 1
+    }
+}
+
