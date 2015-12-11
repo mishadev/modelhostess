@@ -12,7 +12,7 @@ var Validation = require('../../infrastructure/utils/Validation');
 var port = +(process.env.PORT || '3000');
 Validation.IsTypeOf(port, 'number');
 
-var application = ApplicationFactory.createAssetsApplication(path.join(__dirname, 'assets'));
+var application = ApplicationFactory.createAssetsApplication(path.join(path.dirname(__dirname), 'assets'));
 var server = http.createServer(application.instance());
 
 function _onError(error) {
