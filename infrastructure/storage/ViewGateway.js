@@ -5,13 +5,13 @@ var Validation = require('../utils/Validation');
 
 var mongoUrl = 'mongodb://' + process.env.VIEWDB_PORT_27017_TCP_ADDR + ':' + process.env.VIEWDB_PORT_27017_TCP_PORT + '/views';
 
-function _getProfiles(criteria, callback) {
+function _userExists(username, callback) {
     Client.connect(mongoUrl, function(error, db) {
         console.log("open connection to " + mongoUrl);
         Validation.IsNull(error);
 
-        var collection = db.collection('Profiles');
-        collection.find(criteria).toArray(function(error, result) {
+        var collection = db.collection('UserExists');
+        collection.find({ username: username }).toArray(function(error, result) {
             Validation.IsNull(error);
 
             db.close();
@@ -21,13 +21,13 @@ function _getProfiles(criteria, callback) {
     });
 }
 
-function _insertProfile(profile, callback) {
+function _insertUserExists(user, callback) {
     Client.connect(mongoUrl, function(error, db) {
         console.log("open connection to " + mongoUrl);
         Validation.IsNull(error);
 
-        var collection = db.collection('Profiles');
-        collection.insert(profile, function(err, result) {
+        var collection = db.collection('UserExists');
+        collection.insert(user, function(err, result) {
             Validation.IsNull(error);
 
             db.close();
@@ -38,6 +38,6 @@ function _insertProfile(profile, callback) {
 }
 
 module.exports = {
-    GetProfiles: _getProfiles,
-    InsertProfile: _insertProfile
+    userExists: _userExists,
+    insertUserExists: _insertUserExists
 }

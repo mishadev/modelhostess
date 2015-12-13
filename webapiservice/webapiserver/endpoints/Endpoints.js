@@ -1,6 +1,6 @@
 "use strict";
 
 var _ = require('lodash');
-var Test = require('./Test');
+var User = require('./User');
 
-module.exports = _.flatten([Test]);
+module.exports = _.flatten([User]);

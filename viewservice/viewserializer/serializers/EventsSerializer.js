@@ -6,13 +6,13 @@ var _ = require('lodash');
 var Handler = require('../../infrastructure/queue/Handler');
 var ViewGateway = require('../../infrastructure/storage/ViewGateway');
 
-var ProfileSerializer = require('./ProfileSerializer');
+var UserSerializer = require('./UserSerializer');
 
 function EventsSerializer() {
     Handler.call(this);
 
     var _services = {
-        misha: [new ProfileSerializer()]
+        userAdded: [UserSerializer]
     };
 
     var _createAggrigationCallback = function(count, callback) {
@@ -25,12 +25,13 @@ function EventsSerializer() {
     };
 
     this.handle = function handle(event, callback) {
+        console.dir(event);
         var handlers = _.get(_services, event.type);
         if(!_.any(handlers)) return callback();
 
         var cb = _createAggrigationCallback(handlers.length, callback);
         _.each(handlers, function(handler) {
-            var method = handler.handel;
+            var method = handler[event.type];
             if (_.isFunction(method)) {
                 method.call(handler, event, cb);
             } else {
@@ -39,6 +40,6 @@ function EventsSerializer() {
         });
     };
 }
-util.inherits(CommandsExecutor, Handler);
+util.inherits(EventsSerializer, Handler);
 
-module.exports = CommandsExecutor;
+module.exports = EventsSerializer;

@@ -5,12 +5,12 @@ var Validation = require('../utils/Validation');
 
 var mongoUrl = 'mongodb://' + process.env.LOGICDB_PORT_27017_TCP_ADDR + ':' + process.env.LOGICDB_PORT_27017_TCP_PORT + '/models';
 
-function _getSome(criteria, callback) {
+function _getUserInfo(criteria, callback) {
     Client.connect(mongoUrl, function(error, db) {
         console.log("open connection to " + mongoUrl);
         Validation.IsNull(error);
 
-        var collection = db.collection('Some');
+        var collection = db.collection('Users');
         collection.find(criteria).toArray(function(error, result) {
             Validation.IsNull(error);
 
@@ -21,12 +21,12 @@ function _getSome(criteria, callback) {
     });
 }
 
-function _setSome(data, callback) {
+function _createUser(data, callback) {
     Client.connect(mongoUrl, function(error, db) {
         console.log("open connection to " + mongoUrl);
         Validation.IsNull(error);
 
-        var collection = db.collection('Some');
+        var collection = db.collection('Users');
         collection.insert(data, function(err, result) {
             Validation.IsNull(error);
 
@@ -38,6 +38,6 @@ function _setSome(data, callback) {
 }
 
 module.exports = {
-    GetSome: _getSome,
-    SetSome: _setSome
+    getUserInfo: _getUserInfo,
+    createUser: _createUser
 }

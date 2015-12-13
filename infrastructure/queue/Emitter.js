@@ -12,6 +12,7 @@ function Emitter() {
         _emmiter.on('message', handler);
     }
     this.publish = function publish(message) {
+        console.log(message);
         _emmiter.emit('message', message);
     }
     this.destroy = function destroy() {

@@ -1,38 +1,23 @@
 "use strict";
 
-var _ = require('lodash');
-// var qwest = require('qwest');
+var qwest = require('qwest');
 
 var ApiWebClient = {
     AuthenticateUser: function(username, password) {
-        console.log("AuthenticateUser");
-        console.log(username);
-        console.log(password);
-
-        return {
-            then: function(func) {
-                _.defer(func);
-                return this;
-            },
-            catch: function(func) {
-                return this;
-            }
-        }
+        return qwest.post('http://localhost:3000/api/auth/', {
+            username: username,
+            password: password
+        }, {
+            dataType: 'json'
+        });
     },
     CreateUser: function(username, password) {
-        console.log("CreateUser");
-        console.log(username);
-        console.log(password);
-
-        return {
-            then: function(func) {
-                _.defer(func);
-                return this;
-            },
-            catch: function(func) {
-                return this;
-            }
-        }
+        return qwest.post('http://localhost:3000/api/users/create', {
+            username: username,
+            password: password
+        }, {
+            dataType: 'json'
+        });
     }
 };
 

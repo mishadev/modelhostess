@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require("lodash");
 var React = require("react");
 
 var Command = require("../core/Command");
@@ -7,40 +8,46 @@ var Symbols = require("../core/Symbols");
 var Query = require("../core/Query");
 var Component = require("../core/Component");
 
-var UserInfoStore = require("../stores/UserInfoStore");
+var UserExistsStore = require("../stores/UserExistsStore");
 
-var Application = Component.Create(UserInfoStore, {
+var Application = Component.Create(UserExistsStore, {
     getState: function() {
         return {
-            UserInfo: UserInfoStore.get()
+            exists: UserExistsStore.get(_.get(this.state, 'username'))
         };
     },
 
     componentDidUpdate: function() {
-        if (!UserInfoStore.has()) {
-            Query(Symbols.UserInfo);
+        if (this.state.username && !UserExistsStore.has(this.state.username)) {
+            Query(Symbols.UserExists, this.state.username);
         }
     },
 
     signIn: function() {
-        var username = this.refs.username.getDOMNode().value;
         var password = this.refs.password.getDOMNode().value;
 
-        Command(Symbols.AuthenticateUser, username, password);
+        Command(Symbols.AuthenticateUser, this.state.username, password);
     },
 
     singUp: function() {
-        var username = this.refs.username.getDOMNode().value;
         var password = this.refs.password.getDOMNode().value;
 
-        Command(Symbols.CreateUser, username, password);
+        Command(Symbols.CreateUser, this.state.username, password);
+    },
+
+    _onUsernameChange: function(ev) {
+        this.setState({ username: ev.target.value });
     },
 
     render: function() {
         return (<div>
-            <div>{this.state.UserInfo}</div>
+            <div>exists: {this.state.exists}</div>
             <div>
-                login: <input id="username" ref="username" maxLength="255" name="username" type="text" />
+                login: <input id="username"
+                    onChange={this._onUsernameChange}
+                    maxLength="255"
+                    name="username"
+                    type="text" />
             </div>
             <div>
                 password: <input id="password" ref="password" name="password" type="password" />

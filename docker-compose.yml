@@ -59,6 +59,8 @@ webapiserver:
   ports:
     - "0.0.0.0:3000:3000"
   build: ./webapiservice
+  links:
+    - mqserver
 
 assetsserver:
   volumes:

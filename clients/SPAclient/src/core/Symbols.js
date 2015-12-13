@@ -6,7 +6,8 @@ var Symbols = [
     "AuthenticateUser",
     "CreateUser",
 
-    "UserInfo"
+    "UserInfo",
+    "UserExists"
 ];
 
 module.exports = _.mapKeys(Symbols, _.indentity);

@@ -5,22 +5,22 @@ var util = require('util');
 var _ = require('lodash');
 
 var Emitter = require('../../infrastructure/queue/Emitter');
-var Events = require('../events/Events');
+var Command = require('../commands/Command');
 
-function EventsPublisher() {
+function CommandsPublisher() {
     Emitter.call(this);
 
     var _publish = _.bind(function(event) {
         this.publish(JSON.stringify(event));
     }, this);
-    Events.on(_publish);
+    Command.on(_publish);
 
     var _destory = this.destory;
     this.destory = function() {
-        Events.off(_publish);
+        Command.off(_publish);
         _destory();
     }
 }
-util.inherits(EventsPublisher, Emitter);
+util.inherits(CommandsPublisher, Emitter);
 
-module.exports = EventsPublisher;
+module.exports = CommandsPublisher;

@@ -47,6 +47,17 @@ function ExpressApplication(options) {
     _application.use(bodyParser.json());
     _application.use(bodyParser.urlencoded({ extended: false }));
     _application.use(compression());
+    _application.use(function(req, res, next) {
+        res.set('Access-Control-Allow-Origin', '*');
+        if (req.method === 'OPTIONS') {
+            res.set('Access-Control-Allow-Method', req.get('Access-Control-Request-Method'));
+            res.set('Access-Control-Allow-Headers', req.get('Access-Control-Request-Headers'));
+            res.set('Access-Control-Max-Age', '1728000');
+
+            return res.sendStatus(200);
+        }
+        return next();
+    });
     _registerDirectory(options.staticDirectory);
     _registerRoutes(options.routes);
 
@@ -61,8 +72,9 @@ function ExpressApplication(options) {
     _application.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.send({
-            message: err.message,
-            error: _application.get('env') === 'development' ? err : {}
+            data: {},
+            error: err.message,
+            stack: _application.get('env') === 'development' ? err : {}
         });
     });
 

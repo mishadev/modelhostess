@@ -8,6 +8,8 @@ var Endpoints = require('../endpoints/Endpoints');
 
 var Validation = require('../../infrastructure/utils/Validation');
 
+var setup = require('../publishers/setup');
+
 var port = +(process.env.PORT || '3000');
 Validation.IsTypeOf(port, 'number');
 
@@ -35,4 +37,5 @@ function _onListening() {
 
 server.on('error', _onError);
 server.on('listening', _onListening);
+setup();
 server.listen(port);

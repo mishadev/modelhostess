@@ -4,24 +4,14 @@ var util = require('util');
 var _ = require('lodash');
 
 var Handler = require('../../infrastructure/queue/Handler');
-var LogicGateway = require('../../infrastructure/storage/LogicGateway');
+
+var UserService = require('./UserService');
 
 function CommandsExecutor() {
     Handler.call(this);
 
     var _services = {
-        misha: [{
-                misha: function(argument, callback) {
-                    console.log(JSON.stringify(argument));
-                    LogicGateway.SetSome({"misha": "misha"}, callback);
-                }
-            },
-            {
-                misha: function(argument, callback) {
-                    console.log(JSON.stringify(argument));
-                    callback('fuck off');
-                }
-            }]
+        createUser: [UserService]
     };
 
     var _createAggrigationCallback = function(count, callback) {

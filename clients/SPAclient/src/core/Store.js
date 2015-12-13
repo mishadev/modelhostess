@@ -41,7 +41,14 @@ function Store(options) {
     };
 
     this.set = function(state) {
-        _state = state;
+        var path = _.initial(arguments);
+        var value = _.last(arguments);
+
+        if (path) {
+            _.set(_state, path, value);
+        } else {
+            _state = value;
+        }
     }
 
     this.has = function() {
