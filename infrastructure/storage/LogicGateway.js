@@ -11,8 +11,15 @@ function _getUserInfo(criteria, callback) {
         Validation.IsNull(error);
 
         var collection = db.collection('Users');
+        console.log("1----");
+        console.dir(criteria);
+        console.log("1----");
         collection.find(criteria).toArray(function(error, result) {
             Validation.IsNull(error);
+
+            console.log("2----");
+            console.dir(result);
+            console.log("2----");
 
             db.close();
             console.log("close connection to " + mongoUrl);

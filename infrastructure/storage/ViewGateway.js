@@ -21,13 +21,13 @@ function _userExists(username, callback) {
     });
 }
 
-function _insertUserExists(user, callback) {
+function _insertUserExists(data, callback) {
     Client.connect(mongoUrl, function(error, db) {
         console.log("open connection to " + mongoUrl);
         Validation.IsNull(error);
 
         var collection = db.collection('UserExists');
-        collection.insert(user, function(err, result) {
+        collection.insert(data, function(err, result) {
             Validation.IsNull(error);
 
             db.close();

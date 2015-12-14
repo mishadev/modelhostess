@@ -71,10 +71,12 @@ function ExpressApplication(options) {
     //error handler
     _application.use(function(err, req, res, next) {
         res.status(err.status || 500);
+        console.log(err.stack);
         res.send({
-            data: {},
+            data: {success: false},
             error: err.message,
-            stack: _application.get('env') === 'development' ? err : {}
+            //stack: _application.get('env') === 'development' ? err.stack : {}
+            stack: err.stack
         });
     });
 

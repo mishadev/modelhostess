@@ -13,8 +13,12 @@ var UserExistsStore = require("../stores/UserExistsStore");
 var Application = Component.Create(UserExistsStore, {
     getState: function() {
         return {
-            exists: UserExistsStore.get(_.get(this.state, 'username'))
+            status: UserExistsStore.get(_.get(this.state, 'username'))
         };
+    },
+
+    componentWillMount: function(argument) {
+        this._setStateDebounced = _.debounce(this.setState, 500);
     },
 
     componentDidUpdate: function() {
@@ -26,7 +30,7 @@ var Application = Component.Create(UserExistsStore, {
     signIn: function() {
         var password = this.refs.password.getDOMNode().value;
 
-        Command(Symbols.AuthenticateUser, this.state.username, password);
+        Query(Symbols.GetUserToken, this.state.username, password);
     },
 
     singUp: function() {
@@ -36,18 +40,18 @@ var Application = Component.Create(UserExistsStore, {
     },
 
     _onUsernameChange: function(ev) {
-        this.setState({ username: ev.target.value });
+        this._setStateDebounced({ username: ev.target.value });
     },
 
     render: function() {
         return (<div>
-            <div>exists: {this.state.exists}</div>
             <div>
                 login: <input id="username"
                     onChange={this._onUsernameChange}
                     maxLength="255"
                     name="username"
                     type="text" />
+                <div>{_.get(this.state, ["status", "exists"]) && 'already exists'}</div>
             </div>
             <div>
                 password: <input id="password" ref="password" name="password" type="password" />

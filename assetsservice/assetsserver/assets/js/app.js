@@ -958,7 +958,8 @@ function Store(options) {
         var path = _.initial(arguments);
         var value = _.last(arguments);
 
-        if (path) {
+        if (_.any(path)) {
+            _state = _state || {};
             _.set(_state, path, value);
         } else {
             _state = value;
@@ -1062,8 +1063,13 @@ var UserExistsStore = StoreFactory.Create({
             this.set(query.response.data.username, query.response.data);
         };
 
+        var _reset = function(argument) {
+            this.set({});
+        };
+
         var _handlers = {};
         _handlers[Convention.Success(Symbols.UserExists)] = _set;
+        _handlers[Convention.Success(Symbols.CreateUser)] = _reset;
 
         return _handlers;
     }
@@ -1196,8 +1202,12 @@ var UserExistsStore = require("../stores/UserExistsStore");
 var Application = Component.Create(UserExistsStore, {
     getState: function() {
         return {
-            exists: UserExistsStore.get(_.get(this.state, 'username'))
+            status: UserExistsStore.get(_.get(this.state, 'username'))
         };
+    },
+
+    componentWillMount: function(argument) {
+        this._setStateDebounced = _.debounce(this.setState, 500);
     },
 
     componentDidUpdate: function() {
@@ -1209,7 +1219,7 @@ var Application = Component.Create(UserExistsStore, {
     signIn: function() {
         var password = this.refs.password.getDOMNode().value;
 
-        Command(Symbols.AuthenticateUser, this.state.username, password);
+        Query(Symbols.GetUserToken, this.state.username, password);
     },
 
     singUp: function() {
@@ -1219,18 +1229,18 @@ var Application = Component.Create(UserExistsStore, {
     },
 
     _onUsernameChange: function(ev) {
-        this.setState({ username: ev.target.value });
+        this._setStateDebounced({ username: ev.target.value });
     },
 
     render: function() {
         return (React.createElement("div", null, 
-            React.createElement("div", null, "exists: ", this.state.exists), 
             React.createElement("div", null, 
                 "login: ", React.createElement("input", {id: "username", 
                     onChange: this._onUsernameChange, 
                     maxLength: "255", 
                     name: "username", 
-                    type: "text"})
+                    type: "text"}), 
+                React.createElement("div", null, _.get(this.state, ["status", "exists"]) && 'already exists')
             ), 
             React.createElement("div", null, 
                 "password: ", React.createElement("input", {id: "password", ref: "password", name: "password", type: "password"})

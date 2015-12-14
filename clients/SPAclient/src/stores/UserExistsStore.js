@@ -10,8 +10,13 @@ var UserExistsStore = StoreFactory.Create({
             this.set(query.response.data.username, query.response.data);
         };
 
+        var _reset = function(argument) {
+            this.set({});
+        };
+
         var _handlers = {};
         _handlers[Convention.Success(Symbols.UserExists)] = _set;
+        _handlers[Convention.Success(Symbols.CreateUser)] = _reset;
 
         return _handlers;
     }

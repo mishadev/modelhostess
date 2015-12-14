@@ -40,6 +40,7 @@ function AmqpConsumer(amqpUrl, queueName, handler) {
                     handler.handle(_tryParse(body), function(message) {
                         console.log(" [x] Task takes %d ms", Date.now() - start);
                         ch.ack(msg);
+                        console.log(message);
                         console.log(" [x] Done");
                     });
                 }

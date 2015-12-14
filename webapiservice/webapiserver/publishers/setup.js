@@ -15,7 +15,7 @@ function setup() {
         port: process.env.MQSERVER_PORT_5672_TCP_PORT
     });
 
-    var publisher = new AmqpPublisher(amqpUrl, process.env.EVENT_QUEUE_NAME, new CommandsPublisher());
+    var publisher = new AmqpPublisher(amqpUrl, process.env.COMMAND_QUEUE_NAME, new CommandsPublisher());
 
     _.delay(publisher.connect.bind(publisher), 5000);
 }

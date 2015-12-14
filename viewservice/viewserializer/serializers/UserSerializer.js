@@ -6,7 +6,7 @@ var ViewGateway = require("../../infrastructure/storage/ViewGateway");
 
 var UserSerializer = {
     userAdded: function(event, callback) {
-        ViewGateway.insertUserExists(_.pick(event.user, "username"), callback);
+        ViewGateway.insertUserExists(event.args, callback);
     }
 }
 

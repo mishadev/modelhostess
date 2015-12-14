@@ -25,7 +25,6 @@ function EventsSerializer() {
     };
 
     this.handle = function handle(event, callback) {
-        console.dir(event);
         var handlers = _.get(_services, event.type);
         if(!_.any(handlers)) return callback();
 
